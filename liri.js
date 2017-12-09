@@ -185,6 +185,11 @@ function getOMDBData(movie){
 }
 
 function doCommand() {
+  fs.readFile('random.txt', "utf8", function(error, data){
+    var txt = data.split(',');
+
+    time2Spotify(txt[1]);
+  });
 
 }
 
@@ -223,9 +228,3 @@ switch(liriCommand) {
 		console.log("my-tweets, spotify-this-song, movie-this, do-what-it-says");
 		break;
 }
-
-
-
-
-
-
