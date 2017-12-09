@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/shulme801/liri-node-app#readme",
   "dependencies": {
+    "http": "0.0.0",
     "node-spotify-api": "^1.0.7",
+    "omdb": "^0.8.0",
+    "omdbapi": "^2.0.1",
     "request": "^2.83.0",
     "spotify": "^0.3.0",
     "twitter": "^1.7.1"

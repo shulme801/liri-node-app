@@ -39,6 +39,7 @@ var twitter = require('twitter');
 var Spotify = require('node-spotify-api');
 var request = require('request');
 var fs 		  = require('fs');
+var myHTTP  = require('http');
 
 
 var tClient = new twitter({
@@ -68,7 +69,6 @@ var liriParamPos   = 3;
 
 var nodeParams = process.argv; // Copy those arguments off the command line.
 var liriCommand = cmdLineParams[liriCommandPos]; //Save off the command to Liri
-console.log("liriCommand is "+liriCommand);
 var liriParams = "";
 
 
@@ -161,7 +161,7 @@ function time2Spotify(song) {
   if (err) {
     return console.log('Error occurred: ' + err);
   }
-    // console.log(data); 
+    
     for(var i = 0; i < data.tracks.items.length; i++){
         var songData = data.tracks.items[i];
         
@@ -179,8 +179,39 @@ function time2Spotify(song) {
   
 
 
-function getOMDBData(){
+function getOMDBData(movie){
 
+console.log('Movie Title is '+movie);
+var omdbURL = 'http://www.omdbapi.com/?t=' + movie +'&y=&plot=long&tomatoes=true&r=json&apikey=849535a0';
+  myHTTP.request(omdbURL, function (error, response, body){
+    if(!error && response.statusCode == 200){
+      var body = JSON.parse(body);
+
+      console.log("Title: " + body.Title);
+      console.log("Release Year: " + body.Year);
+      console.log("IMdB Rating: " + body.imdbRating);
+      console.log("Country: " + body.Country);
+      console.log("Language: " + body.Language);
+      console.log("Plot: " + body.Plot);
+      console.log("Actors: " + body.Actors);
+      console.log("Rotten Tomatoes Rating: " + body.tomatoRating);
+      console.log("Rotten Tomatoes URL: " + body.tomatoURL);
+
+      //adds text to log.txt
+      fs.appendFile('log.txt', "Title: " + body.Title);
+      fs.appendFile('log.txt', "Release Year: " + body.Year);
+      fs.appendFile('log.txt', "IMdB Rating: " + body.imdbRating);
+      fs.appendFile('log.txt', "Country: " + body.Country);
+      fs.appendFile('log.txt', "Language: " + body.Language);
+      fs.appendFile('log.txt', "Plot: " + body.Plot);
+      fs.appendFile('log.txt', "Actors: " + body.Actors);
+      fs.appendFile('log.txt', "Rotten Tomatoes Rating: " + body.tomatoRating);
+      fs.appendFile('log.txt', "Rotten Tomatoes URL: " + body.tomatoURL);
+
+    } else {
+      console.log('Error occurred.')
+    }
+  })
 }
 
 function doCommand() {
@@ -188,14 +219,3 @@ function doCommand() {
 }
 
 
-
-// tClient.post('statuses/update', {status: 'I Love Twitter'},  function(error, tweet, response) {
-// if(error) throw error;
-// console.log(tweet);  // Tweet body. 
-// console.log(response);  // Raw response object. 
-// });
-
-//request('http://www.google.com', function (error, response, body) {
-//  console.log('error:', error);
-//  console.log('statusCode:', response && response.statusCode); 
-//});
