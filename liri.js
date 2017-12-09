@@ -58,6 +58,8 @@ var spotify = new Spotify({
 var screenName   = {screen_name: 'Real_SteveHulme'};
 var dividerLine  = "\n++++++++++++++++++++++++\n";
 var movieResults = [];
+var songResults  = [];
+var songLimit  = 5; //max number of songs we'll return from Spotify
 
 /* The following grabs the command line parameters from the process.argv array and stores them into globals.  
    The first element is the node command and the second is the file name of this file
@@ -87,7 +89,7 @@ function grabLiriParams() {
 
   liriParams = cmdLineParams[liriParamPos]; //get that first parameter word from cmdLineParams
   for (var i=liriParamPos+1; i<cmdLineParams.length; i++){ //start at second work in the parameter (if there is on)
-    liriParams += " "+cmdLineParams[i];
+    liriParams += " "+"\""+cmdLineParams[i]+"\"";
   }
 
 }
@@ -99,7 +101,7 @@ function logIt (logString){
         });
 }
 
-function movieOutput (outStr) {
+function txtOutput (outStr) {
   console.log(outStr);
   outStr+="\n";
   logIt(outStr);
@@ -113,9 +115,9 @@ function showTweets(){
     if(!error){
       for(var i = 0; i<tweets.length; i++){
         var date = tweets[i].created_at;
-        console.log("@Real_SteveHulme: " + tweets[i].text + " Created At: " + date.substring(0, 19));
-        console.log(dividerLine);
-        logString = "@Real_SteveHulme: " + tweets[i].text + " Created At: " + date.substring(0, 19)+dividerLine;
+        var j = i+1; 
+        logString = "Tweet #"+j+" from: "+"@Real_SteveHulme: " + tweets[i].text + " Created At: " + date.substring(0, 19)+dividerLine;
+        console.log(logString);
         logIt(logString);
       }
     }else{
@@ -126,9 +128,9 @@ function showTweets(){
 
 
 
-function time2Spotify(song) {
+function time2Spotify(song,numSongs) {
   
-  spotify.search({ type: 'track', query: song }, function(err, data) {
+  spotify.search({ type: 'track', query: song, limit: numSongs }, function(err, data) {
   if (err) {
     return console.log('Error occurred: ' + err);
   }
@@ -136,16 +138,17 @@ function time2Spotify(song) {
     for(var i = 0; i < data.tracks.items.length; i++){
         var songData = data.tracks.items[i];
         
-        console.log("Artist: " + songData.artists[0].name);
+        songResults.push("Artist: " + songData.artists[0].name);
+        songResults.push("Song: " + songData.name);
+        songResults.push("Preview URL: " + songData.preview_url);
+        songResults.push("Album: " + songData.album.name);
+        songResults.forEach(txtOutput);
+        console.log(dividerLine);
+        logIt(dividerLine);
         
-        console.log("Song: " + songData.name);
-        
-        console.log("Preview URL: " + songData.preview_url);
-        
-        console.log("Album: " + songData.album.name);
-        console.log("-----------------------")
       }
   });
+  songResults=[];
 }
   
 
@@ -171,7 +174,7 @@ function getOMDBData(movie){
       movieResults.push("Rotten Tomatoes Rating: " + body.tomatoRating);
       movieResults.push("Rotten Tomatoes Rating: " + body.tomatoURL);
 
-      movieResults.forEach(movieOutput);
+      movieResults.forEach(txtOutput);
       
       console.log(dividerLine);
       logIt(dividerLine);
@@ -188,7 +191,7 @@ function doCommand() {
   fs.readFile('random.txt', "utf8", function(error, data){
     var txt = data.split(',');
 
-    time2Spotify(txt[1]);
+    time2Spotify(txt[1],1);
   });
 
 }
@@ -201,17 +204,19 @@ switch(liriCommand) {
 
 	case "spotify-this-song":
 		if (nodeParams.length <= 3) { // there's no 4th argument on cmd line, so we know user forgot to give us song info
-			forgotParameter(liriCommand);
+			
+      time2Spotify("Who Put The Bomp",1);
 		} else {
 			grabLiriParams(nodeParams); //Pass the command line arguments into the function that going to build the Liri parm string
-			time2Spotify(liriParams); // Now that we have the liri command parameters (that is, song info), let's call Spotify
+			time2Spotify(liriParams,songLimit); // Now that we have the liri command parameters (that is, song info), let's call Spotify
 		}
 		
 		break;
 
 	case "movie-this":
 		if (nodeParams.length <= 3) { // there's no 4th argument on cmd line, so we know user forgot to give us movie info
-			forgotParameter(liriCommand);
+			
+      getOMDBData("Mr. Nobody");
 		} else {
 			grabLiriParams(nodeParams); //Pass the command line arguments into the function that going to build the Liri parm string
 			getOMDBData(liriParams); // Now that we have the liri command parameters (that is, movie info), let's call OMDB
