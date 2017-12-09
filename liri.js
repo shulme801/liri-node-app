@@ -9,7 +9,7 @@
 
    LIRI responds to 4 valid input commands. These valid input commands are
    -- my-tweets: return the last 20 tweets I've sent and the date stamp for each.
-   -- spotify-this-song, followed by a song name: This command will show the folling info about a song in the bash window:
+   -- spotify-this-song, followed by a song name: This command will show the following info about a song in the bash window:
  		 Artist(s)
          The song's name
          A preview link of the song from Spotify
@@ -36,7 +36,7 @@
 
 var keys 	  = require('./keys.js');
 var twitter = require('twitter');
-var spotify = require('spotify');
+var Spotify = require('node-spotify-api');
 var request = require('request');
 var fs 		  = require('fs');
 
@@ -46,6 +46,11 @@ var tClient = new twitter({
 	consumer_secret:     keys.consumer_secret,
 	access_token_key:    keys.access_token_key,
 	access_token_secret: keys.access_token_secret 
+});
+
+var spotify = new Spotify({
+  id:     'af17d5b6dd4441abb9980e095aae3ac9',
+  secret: '516c037d3f5448fab7918e5d402dc910'
 });
 
 var screenName = {screen_name: 'Real_SteveHulme'};
@@ -121,8 +126,6 @@ function grabLiriParams() {
 		liriParams += " "+cmdLineParams[i];
 	}
 
-	console.log("liriParams is ")+liriParams;
-
 }
 
 function logIt (logString){
@@ -154,42 +157,27 @@ function showTweets(){
 
 function time2Spotify(song) {
 	
-  spotify.search({ type: 'track', query: song}, function(error, data){
-    if(!error){
-      for(var i = 0; i < data.tracks.items.length; i++){
+  spotify.search({ type: 'track', query: song }, function(err, data) {
+  if (err) {
+    return console.log('Error occurred: ' + err);
+  }
+    // console.log(data); 
+    for(var i = 0; i < data.tracks.items.length; i++){
         var songData = data.tracks.items[i];
-        //artist
-        console.log("Artist: " + songData.artists[0].name);
-        //song name
-        console.log("Song: " + songData.name);
-        //spotify preview link
-        console.log("Preview URL: " + songData.preview_url);
-        //album name
-        console.log("Album: " + songData.album.name);
-        console.log("-----------------------");
         
-        //adds text to log.txt
-        fs.appendFile('log.txt', songData.artists[0].name,(err) => {
-        	if (err) throw err;
-        });
-        fs.appendFile('log.txt', songData.name,(err) => {
-        	if (err) throw err;
-        });
-        fs.appendFile('log.txt', songData.preview_url, (err) => {
-        	if (err) throw err;
-        });
-        fs.appendFile('log.txt', songData.album.name,(err) => {
-        	if (err) throw err;
-        });
-        fs.appendFile('log.txt', "-----------------------", (err) => {
-        	if (err) throw err;
-        });
+        console.log("Artist: " + songData.artists[0].name);
+        
+        console.log("Song: " + songData.name);
+        
+        console.log("Preview URL: " + songData.preview_url);
+        
+        console.log("Album: " + songData.album.name);
+        console.log("-----------------------")
       }
-    } else{
-      console.log('Error occurred.');
-    }
   });
 }
+  
+
 
 function getOMDBData(){
 
